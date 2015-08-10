@@ -130,11 +130,11 @@ class WebhookHandler(webapp2.RequestHandler):
 
     if text.startswith('/'):
       if text == '/start':
-        response = client.get('User', user_id)
+        response = client.get('Chat', chat_id)
         try:
           response.raise_for_status()
         except HTTPError:
-          response = client.put('User', user_id, {
+          response = client.put('Chat', chat_id, {
             'group': 0,
             'username': user_from.get('username')
             })
@@ -151,9 +151,9 @@ class WebhookHandler(webapp2.RequestHandler):
         bot.sendMessage(chat_id=chat_id, text='Help cooming soon...')
       elif text.startswith('/group'):
         group = text.split(' ')[1]
-        bot.sendMessage(chat_id=chat_id, text=('You enter group: %s\nSettings are saved' % str(group)))
+        bot.sendMessage(chat_id=chat_id, text=('You enter group: %s' % str(group)))
       elif text.startswith('/today'):
-        response = client.get('User', user_id)
+        response = client.get('Chat', chat_id)
         try:
           response.raise_for_status()
         except HTTPError:
@@ -167,11 +167,12 @@ class WebhookHandler(webapp2.RequestHandler):
         bot.sendMessage(chat_id=chat_id, text='Help cooming soon...')
     else:
       if getSettings(chat_id):
-        response = client.put('User', user_id, {
+        # Saving settings
+        response = client.put('Chat', chat_id, {
           'group': text,
           'username': user_from.get('username')
           })
-        bot.sendMessage(chat_id=chat_id, text=('You enter group: %s' % str(text)))
+        bot.sendMessage(chat_id=chat_id, text=('You enter group: %s\nSettings are saved' % str(text)))
         setSettings(chat_id, False)
       else:
         bot.sendMessage(chat_id=chat_id, text='Unknown command. Help cooming soon...')
