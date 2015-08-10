@@ -114,20 +114,6 @@ class WebhookHandler(webapp2.RequestHandler):
       logging.info('no text')
       return
 
-    def reply(msg=None):
-      if msg:
-        resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
-          'chat_id': str(chat_id),
-          'text': msg.encode('utf-8'),
-          'disable_web_page_preview': 'true',
-          'reply_to_message_id': str(message_id),
-        })).read()
-      else:
-        resp = None
-
-      logging.info('send response:')
-      logging.info(resp)
-
     if text.startswith('/'):
       if text == '/start':
         response = client.get('Chat', chat_id)
@@ -140,18 +126,34 @@ class WebhookHandler(webapp2.RequestHandler):
             })
         bot.sendMessage(chat_id=chat_id, text=('Hello, @%s!' % user_from.get('username')))
         setEnabled(chat_id, True)
-      elif text == '/settings':
-        bot.sendMessage(chat_id=chat_id, text='Enter please you group')
-        setSettings(chat_id, True)
-      elif text == '/cancel':
-        if getSettings(chat_id):
-          bot.sendMessage(chat_id=chat_id, text='Settings are not saved')
-          setSettings(chat_id, False)
       elif text == '/help':
         bot.sendMessage(chat_id=chat_id, text='Help cooming soon...')
       elif text.startswith('/group'):
-        group = text.split(' ')[1]
-        bot.sendMessage(chat_id=chat_id, text=('You enter group: %s' % str(group)))
+        try:
+          group = text.split(' ')[1]
+        except IndexError:
+          group = '0'
+          bot.sendMessage(chat_id=chat_id, text=('Enter, please, /group with number'))
+        if group != '0':
+          bot.sendMessage(chat_id=chat_id, text=('You enter group: %s' % str(group)))
+          # Then load schedule for this group
+      elif text.startswith('/setgroup'):
+        try:
+          group = text.split(' ')[1]
+        except IndexError:
+          group = '0'
+          bot.sendMessage(chat_id=chat_id, text=('Enter, please, /setgroup with number'))
+        if group != '0':
+          # Saving settings
+          response = client.put('Chat', chat_id, {
+            'group': group,
+            'username': user_from.get('username')
+            })
+          bot.sendMessage(chat_id=chat_id, text=('You enter group: %s\nSettings are saved' % str(group)))
+      # elif text == '/cancel':
+        # if getSettings(chat_id):
+          # bot.sendMessage(chat_id=chat_id, text='Settings are not saved')
+          # setSettings(chat_id, False)
       elif text.startswith('/today'):
         response = client.get('Chat', chat_id)
         try:
@@ -160,22 +162,16 @@ class WebhookHandler(webapp2.RequestHandler):
           bot.sendMessage(chat_id=chat_id, text='Sorry, something wrong!')
         group = response.json['group']
         if str(group) == '0':
-          bot.sendMessage(chat_id=chat_id, text=('Set your group using /settings'))
+          bot.sendMessage(chat_id=chat_id, text=('Set your group using /setgroup [number]'))
         else:
           bot.sendMessage(chat_id=chat_id, text=('Your group: %s' % str(group)))
-      else:
-        bot.sendMessage(chat_id=chat_id, text='Help cooming soon...')
-    else:
-      if getSettings(chat_id):
-        # Saving settings
-        response = client.put('Chat', chat_id, {
-          'group': text,
-          'username': user_from.get('username')
-          })
-        bot.sendMessage(chat_id=chat_id, text=('You enter group: %s\nSettings are saved' % str(text)))
-        setSettings(chat_id, False)
+          # Then load schedule for current group
       else:
         bot.sendMessage(chat_id=chat_id, text='Unknown command. Help cooming soon...')
+    else:
+      # bot.sendMessage(chat_id=chat_id, text='Unknown command. Help cooming soon...')
+      logging.info('no command')
+      logging.info(text)
 
 
 app=webapp2.WSGIApplication([
