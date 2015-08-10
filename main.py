@@ -115,7 +115,7 @@ class WebhookHandler(webapp2.RequestHandler):
       return
 
     if text.startswith('/'):
-      if text == '/start':
+      if text.startswith('/start'):
         response = client.get('Chat', chat_id)
         try:
           response.raise_for_status()
@@ -126,7 +126,7 @@ class WebhookHandler(webapp2.RequestHandler):
             })
         bot.sendMessage(chat_id=chat_id, text=('Hello, @%s!' % user_from.get('username')))
         setEnabled(chat_id, True)
-      elif text == '/help':
+      elif text.startswith('/help'):
         bot.sendMessage(chat_id=chat_id, text='Help cooming soon...')
       elif text.startswith('/group'):
         try:
@@ -170,8 +170,7 @@ class WebhookHandler(webapp2.RequestHandler):
         bot.sendMessage(chat_id=chat_id, text='Unknown command. Help cooming soon...')
     else:
       # bot.sendMessage(chat_id=chat_id, text='Unknown command. Help cooming soon...')
-      logging.info('no command')
-      logging.info(text)
+      pass
 
 
 app=webapp2.WSGIApplication([
