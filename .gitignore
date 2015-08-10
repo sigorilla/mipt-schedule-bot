@@ -61,6 +61,7 @@ target/
 config.py
 csv
 xls
+lib
 .idea
 *.sublime-*
 tmp.*

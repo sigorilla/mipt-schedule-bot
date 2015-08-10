@@ -21,7 +21,3 @@ libraries:
   version: "2.5.2"
 - name: PIL
   version: latest
-- name: porc
-  version: latest
-- name: python-telegram-bot
-  version: latest
