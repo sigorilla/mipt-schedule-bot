@@ -56,4 +56,11 @@ docs/_build/
 # PyBuilder
 target/
 
+
+# My ignore
 config.py
+csv
+xls
+.idea
+*.sublime-*
+tmp.*

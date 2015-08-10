@@ -14,9 +14,12 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 import webapp2
 
-from config import TOKEN
+import telegram
+
+from config import *
 
 BASE_URL = 'https://api.telegram.org/bot' + TOKEN + '/'
+bot = telegram.Bot(token=TOKEN)
 
 
 # ================================
@@ -45,7 +48,8 @@ def getEnabled(chat_id):
 class MeHandler(webapp2.RequestHandler):
     def get(self):
         urlfetch.set_default_fetch_deadline(60)
-        self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'getMe'))))
+        # self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'getMe'))))
+        self.response.write(json.dumps(json.load(bot.getMe())))
 
 
 class GetUpdatesHandler(webapp2.RequestHandler):
@@ -75,7 +79,8 @@ class WebhookHandler(webapp2.RequestHandler):
         message_id = message.get('message_id')
         date = message.get('date')
         text = message.get('text')
-        fr = message.get('from')
+        user_from = message.get('from')
+        user_id = user_from.get('id')
         chat = message['chat']
         chat_id = chat['id']
 
